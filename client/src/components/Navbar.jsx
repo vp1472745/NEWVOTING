@@ -9,9 +9,15 @@ const Navbar = () => {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const handleLogout = async () => {
-    navigate("/");
-    const path = await logout();
-    navigate("/");
+    try {
+      const path = await logout();
+      setIsLogoutModalOpen(false);
+      navigate(path);
+    } catch (error) {
+      console.error('Logout error:', error);
+      setIsLogoutModalOpen(false);
+      navigate('/');
+    }
   };
 
   const getUserName = () => {

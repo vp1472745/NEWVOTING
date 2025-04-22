@@ -52,10 +52,22 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
+      // Call the server's logout endpoint
+      await axios.post(`/${user.type}/logout`);
+      
+      // Clear local state and storage
       setUser(null);
       localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      
+      return '/';
     } catch (error) {
       console.error('Logout failed:', error);
+      // Even if server logout fails, clear local state
+      setUser(null);
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      return '/';
     }
   };
 

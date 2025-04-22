@@ -18,14 +18,14 @@ import {
 
 const router = express.Router();
 
-
-router.post("/register", createCandidate);
+router.post("/register", organizationProtect, createCandidate);
 router.post("/login", loginCandidate);
 router.put("/update", Candidateprotect, updateCandidateSelf);
 router.put("/update/:id", organizationProtect, updateCandidateByOrganization);
-router.delete("/:id",organizationProtect, deleteCandidate);
-router.get("/all",organizationProtect, getAllCandidates);
-router.put('/bulk-status', bulkUpdateStatus);
-router.get("/:id",  Candidateprotect, getCandidateById);
+router.delete("/:id", organizationProtect, deleteCandidate);
+router.get("/all", organizationProtect, getAllCandidates);
+router.put('/bulk-status', organizationProtect, bulkUpdateStatus);
+router.get("/:id", Candidateprotect, getCandidateById);
 router.get("/election/all", Candidateprotect, getAllElectionIdsForCandidate);
+
 export default router;

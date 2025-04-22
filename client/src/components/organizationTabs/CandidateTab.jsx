@@ -410,7 +410,7 @@ const CandidatesTab = () => {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         candidate={selectedCandidate}
-        onSuccess={fetchCandidates}
+        onUpdate={fetchCandidates}
       />
 
       {/* Uncomment these once modals are available */}

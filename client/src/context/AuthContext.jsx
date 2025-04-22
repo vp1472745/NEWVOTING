@@ -11,15 +11,17 @@ export const AuthProvider = ({ children }) => {
     // Check if user is logged in on initial load
     const checkAuth = async () => {
       try {
+        const token = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
         
-        if (storedUser) {
+        if (token && storedUser) {
           const parsedUser = JSON.parse(storedUser);
           setUser(parsedUser);
         }
       } catch (error) {
         console.error('Auth check failed:', error);
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
       } finally {
         setLoading(false);
       }
@@ -52,8 +54,12 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      // Call the server's logout endpoint
-      await axios.post(`/${user.type}/logout`);
+      // Call the server's logout endpoint based on user type
+      if (user?.type) {
+        await axios.post(`/${user.type}/logout`, {}, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+      }
       
       // Clear local state and storage
       setUser(null);
@@ -62,7 +68,6 @@ export const AuthProvider = ({ children }) => {
       
       return '/';
     } catch (error) {
-      console.error('Logout failed:', error);
       // Even if server logout fails, clear local state
       setUser(null);
       localStorage.removeItem('user');

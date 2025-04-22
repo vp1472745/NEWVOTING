@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import LogoutModal from '../components/modals/LogoutModal';
+import { useAuth } from '../context/AuthContext.jsx';
+import LogoutModal from '../components/modals/LogoutModal.jsx';
 
 const Navbar = () => {
   const { user, logout } = useAuth();

@@ -3,8 +3,9 @@ import axios from "../../../config/axois";
 import { FaTimes, FaUserEdit, FaSpinner } from "react-icons/fa";
 import PropTypes from "prop-types";
 import { motion, AnimatePresence } from "framer-motion";
+import { FiEdit } from 'react-icons/fi';
 
-const EditCandidateModal = ({ isOpen, onClose, candidate, onSuccess }) => {
+const EditCandidateModal = ({ isOpen, onClose, candidate, onUpdate }) => {
   const [formData, setFormData] = useState({
     candidateName: "",
     candidateEmail: "",
@@ -12,7 +13,7 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onSuccess }) => {
     candidatePhone: "",
     candidateGender: "",
     candidateAge: "",
-    candidateStatus: false,
+    candidateStatus: "pending",
     appliedPost: "",
     candidateImage: null,
     candidatePayImage: null
@@ -35,7 +36,7 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onSuccess }) => {
         candidatePhone: candidate.candidatePhone || "",
         candidateGender: candidate.candidateGender || "",
         candidateAge: candidate.candidateAge || "",
-        candidateStatus: candidate.candidateStatus || false,
+        candidateStatus: candidate.candidateStatus || "pending",
         appliedPost: candidate.appliedPost || "",
         candidateImage: candidate.candidateImage || null,
         candidatePayImage: candidate.candidatePayImage || null
@@ -107,12 +108,13 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onSuccess }) => {
       );
 
       if (response.data.success) {
-        onSuccess();
+        onUpdate(response.data.candidate);
         onClose();
       } else {
         setError(response.data.message || "Failed to update candidate");
       }
     } catch (err) {
+      console.error("Update error:", err);
       const errorMessage =
         err.response?.data?.message ||
         err.response?.data?.error ||
@@ -152,7 +154,7 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onSuccess }) => {
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-4 rounded-t-xl flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <FaUserEdit className="text-white text-xl" />
+              <FiEdit className="text-white text-xl" />
               <h2 className="text-xl font-semibold text-white">Edit Candidate</h2>
             </div>
             <button
@@ -262,19 +264,14 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onSuccess }) => {
                 <label className="block text-sm font-medium text-gray-700">Status</label>
                 <select
                   name="candidateStatus"
-                  value={formData.candidateStatus.toString()}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      candidateStatus: e.target.value === "true"
-                    }))
-                  }
+                  value={formData.candidateStatus}
+                  onChange={handleChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 >
-                  <option value="true">Approved</option>
-                  <option value="false">Pending</option>
-                  <option value="false">Rejected</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
                 </select>
               </div>
             </div>
@@ -315,7 +312,7 @@ EditCandidateModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   candidate: PropTypes.object.isRequired,
-  onSuccess: PropTypes.func.isRequired
+  onUpdate: PropTypes.func.isRequired
 };
 
 export default EditCandidateModal;

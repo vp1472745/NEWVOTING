@@ -10,9 +10,9 @@ import {
   FaEdit,
   FaBars,
 } from "react-icons/fa";
-import useScrollToTop from "../hooks/useScrollToTop";
+import useScrollToTop from "../hooks/useScrollToTop.jsx";
 
-import EditOrgModal from "../components/modals/Organization/EditOrgModal";
+import EditOrgModal from "../components/modals/Organization/EditOrgModal.jsx";
 import LogoutModal from "../components/modals/LogoutModal.jsx";
 import ElectionsTab from "../components/organizationTabs/ElectionsTab";
 import VotersTab from "../components/organizationTabs/VotersTab";
@@ -20,7 +20,7 @@ import CandidatesTab from "../components/organizationTabs/CandidateTab.jsx";
 
 const Organization = () => {
   useScrollToTop(); // Add auto-scroll to top functionality
-  
+
   const [organization, setOrganization] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -36,15 +36,18 @@ const Organization = () => {
   // Handle click outside sidebar
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && 
-          !event.target.closest('.sidebar-toggle')) {
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target) &&
+        !event.target.closest(".sidebar-toggle")
+      ) {
         setIsSidebarOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -100,10 +103,12 @@ const Organization = () => {
       </button>
 
       <div className="flex h-screen">
-        <aside 
+        <aside
           ref={sidebarRef}
           className={`fixed lg:static lg:block w-64 bg-white shadow transition-all duration-300 h-full ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+            isSidebarOpen
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0"
           }`}
         >
           <div className="p-4 border-b">
@@ -128,15 +133,6 @@ const Organization = () => {
                 {item.name}
               </button>
             ))}
-            <button
-              onClick={() => {
-                setIsLogoutModalOpen(true);
-                setIsSidebarOpen(false);
-              }}
-              className="w-full flex items-center px-4 py-2 text-left text-red-600 hover:bg-red-50"
-            >
-              <FaSignOutAlt className="mr-2" /> Logout
-            </button>
           </nav>
         </aside>
 
@@ -155,35 +151,49 @@ const Organization = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-3 bg-gray-50 rounded">
                   <p className="text-sm text-gray-600">Name</p>
-                  <p className="font-semibold text-gray-800">{organization.orgName}</p>
+                  <p className="font-semibold text-gray-800">
+                    {organization.orgName}
+                  </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded">
                   <p className="text-sm text-gray-600">Email</p>
-                  <p className="font-semibold text-gray-800">{organization.orgEmail}</p>
+                  <p className="font-semibold text-gray-800">
+                    {organization.orgEmail}
+                  </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded">
                   <p className="text-sm text-gray-600">Phone</p>
-                  <p className="font-semibold text-gray-800">{organization.orgPhone}</p>
+                  <p className="font-semibold text-gray-800">
+                    {organization.orgPhone}
+                  </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded">
                   <p className="text-sm text-gray-600">Address</p>
-                  <p className="font-semibold text-gray-800">{organization.orgAddress}</p>
+                  <p className="font-semibold text-gray-800">
+                    {organization.orgAddress}
+                  </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded">
                   <p className="text-sm text-gray-600">Type</p>
-                  <p className="font-semibold text-gray-800">{organization.orgType}</p>
+                  <p className="font-semibold text-gray-800">
+                    {organization.orgType}
+                  </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded">
                   <p className="text-sm text-gray-600">Status</p>
-                  <p className={`font-semibold ${organization.orgStatus ? 'text-green-600' : 'text-red-600'}`}>
-                    {organization.orgStatus ? 'Active' : 'Inactive'}
+                  <p
+                    className={`font-semibold ${
+                      organization.orgStatus ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {organization.orgStatus ? "Active" : "Inactive"}
                   </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded">
                   <p className="text-sm text-gray-600">Website</p>
-                  <a 
-                    href={organization.orgWebsite} 
-                    target="_blank" 
+                  <a
+                    href={organization.orgWebsite}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="font-semibold text-blue-600 hover:underline"
                   >
@@ -192,7 +202,9 @@ const Organization = () => {
                 </div>
                 <div className="col-span-1 sm:col-span-2 p-3 bg-gray-50 rounded">
                   <p className="text-sm text-gray-600">Description</p>
-                  <p className="font-semibold text-gray-800">{organization.orgDescription}</p>
+                  <p className="font-semibold text-gray-800">
+                    {organization.orgDescription}
+                  </p>
                 </div>
               </div>
             </div>
@@ -221,4 +233,3 @@ const Organization = () => {
 };
 
 export default Organization;
-

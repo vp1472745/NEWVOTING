@@ -11,6 +11,8 @@ import candidateRoutes from "./src/routes/candidateRoutes.js";
 import electionRoutes from "./src/routes/electionRoutes.js";
 
 
+
+
 dotenv.config();
 
 const app = express();
@@ -22,10 +24,12 @@ app.use(cors({
 app.use(cookieParser());
 app.use(morgan("dev"));
 
+
 app.use("/api/admin", adminRoutes);
 app.use("/api/election", electionRoutes);
 app.use("/api/org",orgRoutes);
 app.use("/api/candidate",candidateRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("server connected");

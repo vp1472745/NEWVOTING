@@ -8,7 +8,7 @@ import Login from "./pages/Login";
 import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 import AdminDashboard from "./pages/Admin/AdminDashboard.jsx";
 import Organization from "./pages/Organization.jsx";
-import  CandidateDashboard from "../src/pages/Candidate/CandidateDashboard.jsx"
+import  CandidateDashboard from "../src/pages/CandidateDashboard.jsx"
 
 function App() {
   return (

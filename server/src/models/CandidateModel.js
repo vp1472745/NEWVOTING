@@ -48,8 +48,9 @@ const candidateSchema = new mongoose.Schema({
     required: true,
   },
   candidateStatus: {
-    type: Boolean,
- default:false,
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending",
   },
   appliedPost: {
     type: String,

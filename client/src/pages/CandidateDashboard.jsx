@@ -8,7 +8,7 @@ const CandidateDashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [candidateData, setCandidateData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -19,12 +19,13 @@ const CandidateDashboard = () => {
     candidateGender: "",
     candidateAge: "",
     candidateImage: "",
-    candidateStatus: false,
+    candidateStatus: "pending", // Changed to string type to match backend
   });
 
   useEffect(() => {
     if (!authLoading) {
       if (!user || user.type !== "candidate") {
+        navigate("/"); // Redirect if not candidate
         return;
       }
       fetchCandidateData();
@@ -45,25 +46,29 @@ const CandidateDashboard = () => {
       const res = await axios.get(`/candidate/${candidateId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
+      
       if (res.data.success) {
-        setLoading(false);
-        setCandidateData(res.data.candidate);
+        const candidate = res.data.candidate;
+        setCandidateData(candidate);
         setFormData({
-          candidateName: res.data.candidate.candidateName || "",
-          candidateEmail: res.data.candidate.candidateEmail || "",
-          candidateAddress: res.data.candidate.candidateAddress || "",
-          candidatePhone: res.data.candidate.candidatePhone || "",
-          candidateGender: res.data.candidate.candidateGender || "",
-          candidateAge: res.data.candidate.candidateAge || "",
-          candidateImage: res.data.candidate.candidateImage || "",
-          candidateStatus: res.data.candidate.candidateStatus || false,
+          candidateName: candidate.candidateName || "",
+          candidateEmail: candidate.candidateEmail || "",
+          candidateAddress: candidate.candidateAddress || "",
+          candidatePhone: candidate.candidatePhone || "",
+          candidateGender: candidate.candidateGender || "",
+          candidateAge: candidate.candidateAge || "",
+          candidateImage: candidate.candidateImage || "",
+          candidateStatus: candidate.candidateStatus || "pending", // Ensure status is set
         });
       } else {
         setError(res.data.message || "Failed to fetch candidate data");
       }
     } catch (err) {
-      setLoading(false);
-      setError(err.response?.data?.message || "Failed to fetch candidate data");
+      console.error("Fetch error:", err);
+      setError(
+        err.response?.data?.message || 
+        "Failed to fetch candidate data. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -79,76 +84,95 @@ const CandidateDashboard = () => {
 
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      try {
-        // Create form data for Cloudinary
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", "voting"); // Your Cloudinary upload preset
+    if (!file) return;
 
-        // Upload to Cloudinary
-        const response = await fetch(
-          "https://api.cloudinary.com/v1_1/dxshlpvcx/image/upload",
-          {
-            method: "POST",
-            body: formData,
-          }
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "voting");
+
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dxshlpvcx/image/upload",
+        { method: "POST", body: formData }
+      );
+
+      const data = await response.json();
+
+      if (data.secure_url) {
+        // Update both form data and make API call to save
+        const updatedFormData = {
+          ...formData,
+          candidateImage: data.secure_url,
+        };
+        
+        const updateResponse = await axios.put(
+          `/candidate/update`,
+          updatedFormData,
+          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
 
-        const data = await response.json();
-
-        if (data.secure_url) {
-          // Update form data with the Cloudinary URL
-          setFormData((prev) => ({
-            ...prev,
-            candidateImage: data.secure_url,
-          }));
-
-          // Save the updated profile with new image URL
-          const updateResponse = await axios.put(
-            `/candidate/update`,
-            {
-              ...formData,
-              candidateImage: data.secure_url,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            }
-          );
-
-          if (updateResponse.data.success) {
-            setCandidateData(updateResponse.data.candidate);
-            setError(null);
-          } else {
-            setError("Failed to update profile with new image");
-          }
+        if (updateResponse.data.success) {
+          setFormData(updatedFormData);
+          setCandidateData(updateResponse.data.candidate);
+          setError(null);
         } else {
-          setError("Failed to upload image to Cloudinary");
+          throw new Error("Failed to update profile with new image");
         }
-      } catch (err) {
-        console.error("Upload error:", err);
-        setError("Failed to upload image");
+      } else {
+        throw new Error("Failed to upload image to Cloudinary");
       }
+    } catch (err) {
+      console.error("Upload error:", err);
+      setError(err.message || "Failed to upload image");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setLoading(true);
       const res = await axios.put(`/candidate/update`, formData, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
+      
       if (res.data.success) {
         setCandidateData(res.data.candidate);
         setIsEditing(false);
         setError(null);
       } else {
-        setError(res.data.message || "Failed to update profile");
+        throw new Error(res.data.message || "Failed to update profile");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update profile");
+      console.error("Update error:", err);
+      setError(err.response?.data?.message || err.message || "Failed to update profile");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "approved":
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+            Approved
+          </span>
+        );
+      case "rejected":
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+            Rejected
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+            Pending
+          </span>
+        );
     }
   };
 
@@ -162,14 +186,34 @@ const CandidateDashboard = () => {
 
   if (error) {
     return (
-      <div className="bg-red-50 border-l-4 border-red-500 p-4 max-w-4xl mx-auto mt-8 text-red-700">
-        {error}
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 text-red-700">
+          {error}
+          <button 
+            onClick={fetchCandidateData}
+            className="ml-4 px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
 
-  if (!user || user.type !== "candidate") {
-    return null;
+  if (!candidateData) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+          <p>No candidate data found</p>
+          <button 
+            onClick={fetchCandidateData}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -180,6 +224,7 @@ const CandidateDashboard = () => {
           <button
             onClick={() => setIsEditing(!isEditing)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
+            disabled={loading}
           >
             <FiEdit2 className="text-lg" />
             {isEditing ? "Cancel" : "Edit Profile"}
@@ -211,6 +256,7 @@ const CandidateDashboard = () => {
                     accept="image/*"
                     onChange={handleImageChange}
                     className="hidden"
+                    disabled={loading}
                   />
                 </label>
               )}
@@ -230,8 +276,9 @@ const CandidateDashboard = () => {
                     name="candidateName"
                     value={formData.candidateName}
                     onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="mt-1 block w-full px-2 rounded-md py-1 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    disabled={!isEditing || loading}
+                    className="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    required
                   />
                 </div>
                 <div>
@@ -242,9 +289,8 @@ const CandidateDashboard = () => {
                     type="email"
                     name="candidateEmail"
                     value={formData.candidateEmail}
-                    // onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="mt-1 block w-full py-1 px-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    disabled
+                    className="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 bg-gray-100"
                   />
                 </div>
                 <div>
@@ -256,8 +302,8 @@ const CandidateDashboard = () => {
                     name="candidatePhone"
                     value={formData.candidatePhone}
                     onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="mt-1 block w-full px-2 py-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    disabled={!isEditing || loading}
+                    className="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -269,8 +315,9 @@ const CandidateDashboard = () => {
                     name="candidateAge"
                     value={formData.candidateAge}
                     onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="mt-1 block w-full px-2 py-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    disabled={!isEditing || loading}
+                    min="18"
+                    className="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -281,8 +328,8 @@ const CandidateDashboard = () => {
                     name="candidateGender"
                     value={formData.candidateGender}
                     onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="mt-1 block w-full py-1 px-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    disabled={!isEditing || loading}
+                    className="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   >
                     <option value="">Select Gender</option>
                     <option value="male">Male</option>
@@ -294,12 +341,8 @@ const CandidateDashboard = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     Status
                   </label>
-                  <div className={`mt-1 px-3 py-1 rounded-full text-sm font-medium ${
-                    formData.candidateStatus 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {formData.candidateStatus ? 'Approved' : 'Pending'}
+                  <div className="mt-2">
+                    {getStatusBadge(formData.candidateStatus)}
                   </div>
                 </div>
                 <div className="md:col-span-2">
@@ -310,20 +353,39 @@ const CandidateDashboard = () => {
                     name="candidateAddress"
                     value={formData.candidateAddress}
                     onChange={handleInputChange}
-                    disabled={!isEditing}
+                    disabled={!isEditing || loading}
                     rows="3"
-                    className="mt-1 block w-full py-1 px-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               {isEditing && (
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(false)}
+                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400"
+                    disabled={loading}
+                  >
+                    Cancel
+                  </button>
                   <button
                     type="submit"
-                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+                    disabled={loading}
                   >
-                    Save Changes
+                    {loading ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
                   </button>
                 </div>
               )}

@@ -7,11 +7,12 @@ import {
   FaUserPlus,
   FaCheck,
   FaTimes,
+  FaSpinner
 } from "react-icons/fa";
 import AddCandidateForm from "../modals/Organization/AddCandidateForm";
 import EditCandidateModal from "../modals/Organization/EditCandidateModal";
 import ViewCandidateModal from "../modals/Organization/ViewCandidateModal";
-import { RiUserSearchLine } from "react-icons/ri"; // Add this import
+import { RiUserSearchLine } from "react-icons/ri";
 
 const CandidatesTab = () => {
   const [candidates, setCandidates] = useState([]);
@@ -21,14 +22,13 @@ const CandidatesTab = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [error, setError] = useState(null);
-  const [elections, setElections] = useState([]); // Add elections state
-  const [searchTerm, setSearchTerm] = useState(""); // Add search term state
-  const [selectedElectionFilter, setSelectedElectionFilter] = useState(""); // Add election filter state
+  const [elections, setElections] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedElectionFilter, setSelectedElectionFilter] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch candidates and elections in parallel
         const [candidatesRes, electionsRes] = await Promise.all([
           axios.get("/candidate/all", {
             headers: {
@@ -64,27 +64,6 @@ const CandidatesTab = () => {
     fetchData();
   }, []);
 
-  const fetchElections = async () => {
-    try {
-      const res = await axios.get("/election/all", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      // Log the full response
-
-      if (res.data.success) {
-        setElections(res.data.elections);
-        // Log the elections data
-      } else {
-        console.error("API returned success: false", res.data.message);
-        setError("Failed to fetch elections. Please try again.");
-      }
-    } catch (err) {
-      console.error("Fetch elections error:", err);
-    }
-  };
-
   const fetchCandidates = async () => {
     try {
       const res = await axios.get("/candidate/all", {
@@ -94,18 +73,12 @@ const CandidatesTab = () => {
       });
       if (res.data.success) {
         setCandidates(res.data.candidates);
-        // Ensure election data is included in the fetched candidates
-        if (res.data.candidates.length > 0) {
-          fetchElections(); // Fetch elections after candidates are loaded
-        }
       } else {
         setError(res.data.message || "Failed to fetch candidates");
       }
     } catch (err) {
       console.error("Fetch candidates error:", err);
       setError(err.response?.data?.message || "Failed to fetch candidates");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -129,27 +102,27 @@ const CandidatesTab = () => {
         });
 
         if (response.data.success) {
-          fetchCandidates();
+          setCandidates(prev => prev.filter(candidate => candidate._id !== id));
         } else {
           setError(response.data.message || "Failed to delete candidate");
         }
       } catch (err) {
         console.error("Delete error:", err);
-        setError(
-          err.response?.data?.message ||
-            "Failed to delete candidate. Please try again."
-        );
+        setError(err.response?.data?.message || "Failed to delete candidate");
       }
     }
   };
 
   const handleStatusChange = async (id, currentStatus) => {
     try {
+      let newStatus;
+      if (currentStatus === "pending") newStatus = "approved";
+      else if (currentStatus === "approved") newStatus = "rejected";
+      else newStatus = "pending";
+
       const res = await axios.put(
         `/candidate/update/${id}`,
-        {
-          candidateStatus: !currentStatus,
-        },
+        { candidateStatus: newStatus },
         {
           headers: {
             "Content-Type": "application/json",
@@ -159,43 +132,41 @@ const CandidatesTab = () => {
       );
 
       if (res.data.success) {
-        setCandidates((prevCandidates) =>
-          prevCandidates.map((candidate) =>
+        setCandidates(prev =>
+          prev.map(candidate =>
             candidate._id === id
-              ? { ...candidate, candidateStatus: !currentStatus }
+              ? { ...candidate, candidateStatus: newStatus }
               : candidate
           )
         );
       } else {
-        setError(res.data.message || "Failed to update candidate status");
+        setError(res.data.message || "Failed to update status");
       }
     } catch (err) {
       console.error("Status update error:", err);
-      setError(
-        err.response?.data?.message || "Failed to update candidate status"
-      );
+      setError(err.response?.data?.message || "Failed to update status");
     }
   };
 
-  const handleBulkStatusChange = async (newStatus) => {
-    if (
-      window.confirm(
-        `Are you sure you want to ${
-          newStatus ? "approve" : "reject"
-        } all candidates?`
-      )
-    ) {
+  const handleBulkStatusChange = async (status) => {
+    const statusText = status ? "approve" : "reject";
+    if (window.confirm(`Are you sure you want to ${statusText} all candidates?`)) {
       try {
-        const res = await axios.put("/candidate/bulk-status", {
-          candidateStatus: newStatus,
-        });
+        const res = await axios.put(
+          "/candidate/bulk-status",
+          { candidateStatus: status ? "approved" : "rejected" },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
         if (res.data.success) {
-          // Update local state
-          setCandidates((prevCandidates) =>
-            prevCandidates.map((candidate) => ({
+          setCandidates(prev =>
+            prev.map(candidate => ({
               ...candidate,
-              candidateStatus: newStatus,
+              candidateStatus: status ? "approved" : "rejected"
             }))
           );
         } else {
@@ -208,44 +179,30 @@ const CandidatesTab = () => {
     }
   };
 
-  if (loading)
-    return <div className="text-center py-8">Loading candidates...</div>;
-  if (error)
-    return <div className="text-center py-8 text-red-600">{error}</div>;
-
   const filteredCandidates = candidates.filter((candidate) => {
-    const election = elections.find((e) => e._id === candidate.election._id);
-
+    const election = elections.find((e) => e._id === candidate.election?._id);
     const matchesSearch =
-      candidate.candidateName
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      candidate.candidateEmail
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
+      candidate.candidateName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      candidate.candidateEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       candidate.appliedPost?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (election &&
-        election.electionName
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()));
+      (election?.electionName?.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesElectionFilter = selectedElectionFilter
-      ? candidate.election._id === selectedElectionFilter
+      ? candidate.election?._id === selectedElectionFilter
       : true;
 
     return matchesSearch && matchesElectionFilter;
   });
 
+  if (loading) return <div className="text-center py-8">Loading candidates...</div>;
+  if (error) return <div className="text-center py-8 text-red-600">{error}</div>;
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">
-            Candidates Management
-          </h2>
-          <p className="text-gray-600 mt-1">
-            Total Candidates: {candidates.length}
-          </p>
+          <h2 className="text-2xl font-bold text-gray-800">Candidates Management</h2>
+          <p className="text-gray-600 mt-1">Total Candidates: {candidates.length}</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -270,9 +227,7 @@ const CandidatesTab = () => {
         </div>
       </div>
 
-      {/* Add Search Bar and Election Filter */}
       <div className="flex gap-4">
-        
         <select
           value={selectedElectionFilter}
           onChange={(e) => setSelectedElectionFilter(e.target.value)}
@@ -327,7 +282,7 @@ const CandidatesTab = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredCandidates.map((candidate) => {
                 const election = elections.find(
-                  (e) => e._id === candidate.election._id
+                  (e) => e._id === candidate.election?._id
                 );
                 return (
                   <tr key={candidate._id}>
@@ -345,26 +300,27 @@ const CandidatesTab = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
-                        onClick={() =>
-                          handleStatusChange(
-                            candidate._id,
-                            candidate.candidateStatus
-                          )
-                        }
+                        onClick={() => handleStatusChange(candidate._id, candidate.candidateStatus)}
                         className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          candidate.candidateStatus
+                          candidate.candidateStatus === "approved"
                             ? "bg-green-100 text-green-800 hover:bg-green-200"
-                            : "bg-red-100 text-red-800 hover:bg-red-200"
+                            : candidate.candidateStatus === "rejected"
+                            ? "bg-red-100 text-red-800 hover:bg-red-200"
+                            : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
                         }`}
                       >
                         <div className="flex items-center">
-                          {candidate.candidateStatus ? (
+                          {candidate.candidateStatus === "approved" ? (
                             <>
                               <FaCheck className="mr-1" /> Approved
                             </>
-                          ) : (
+                          ) : candidate.candidateStatus === "rejected" ? (
                             <>
                               <FaTimes className="mr-1" /> Rejected
+                            </>
+                          ) : (
+                            <>
+                              <FaSpinner className="mr-1" /> Pending
                             </>
                           )}
                         </div>
@@ -410,10 +366,15 @@ const CandidatesTab = () => {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         candidate={selectedCandidate}
-        onUpdate={fetchCandidates}
+        onUpdate={(updatedCandidate) => {
+          setCandidates(prev =>
+            prev.map(candidate =>
+              candidate._id === updatedCandidate._id ? updatedCandidate : candidate
+            )
+          );
+        }}
       />
 
-      {/* Uncomment these once modals are available */}
       <ViewCandidateModal
         isOpen={isViewModalOpen}
         onClose={() => setIsViewModalOpen(false)}

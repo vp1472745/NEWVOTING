@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "../../../config/axois";
-import { FaTimes, FaUserEdit, FaSpinner } from "react-icons/fa";
+import { FaTimes, FaSpinner } from "react-icons/fa";
 import PropTypes from "prop-types";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiEdit } from 'react-icons/fi';
@@ -90,10 +90,16 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onUpdate }) => {
           ? await uploadToCloudinary(formData.candidatePayImage)
           : formData.candidatePayImage;
 
+      const validStatuses = ["pending", "approved", "rejected"];
+      const status = validStatuses.includes(formData.candidateStatus)
+        ? formData.candidateStatus
+        : "pending";
+
       const candidateData = {
         ...formData,
+        candidateStatus: status,
         candidateImage: candidateImageUrl,
-        candidatePayImage: candidatePayImageUrl
+        candidatePayImage: candidatePayImageUrl,
       };
 
       const response = await axios.put(
@@ -102,8 +108,8 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onUpdate }) => {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
@@ -115,11 +121,7 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onUpdate }) => {
       }
     } catch (err) {
       console.error("Update error:", err);
-      const errorMessage =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Failed to update candidate. Please try again.";
-      setError(errorMessage);
+      setError(err.response?.data?.message || "Failed to update candidate. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -151,7 +153,6 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onUpdate }) => {
           transition={{ type: "spring", damping: 20, stiffness: 300 }}
           className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] flex flex-col"
         >
-          {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-4 rounded-t-xl flex justify-between items-center">
             <div className="flex items-center space-x-3">
               <FiEdit className="text-white text-xl" />
@@ -165,20 +166,17 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onUpdate }) => {
             </button>
           </div>
 
-          {/* Error Message */}
           {error && (
             <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mx-4 mt-4 rounded">
               <span>{error}</span>
             </div>
           )}
 
-          {/* Form */}
           <form
             onSubmit={handleSubmit}
             className="p-6 space-y-5 overflow-y-auto"
             style={{ maxHeight: "calc(90vh - 200px)" }}
           >
-            {/* Image Upload */}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -219,9 +217,9 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onUpdate }) => {
               </div>
             </div>
 
-            {/* Form Fields */}
             <div className="grid grid-cols-1 gap-5">
-              {[{ label: "Full Name", name: "candidateName", type: "text" },
+              {[
+                { label: "Full Name", name: "candidateName", type: "text" },
                 { label: "Email", name: "candidateEmail", type: "email" },
                 { label: "Address", name: "candidateAddress", type: "text" },
                 { label: "Phone", name: "candidatePhone", type: "tel" },
@@ -241,7 +239,6 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onUpdate }) => {
                 </div>
               ))}
 
-              {/* Gender */}
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700">Gender</label>
                 <select
@@ -259,7 +256,6 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onUpdate }) => {
                 </select>
               </div>
 
-              {/* Status */}
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700">Status</label>
                 <select
@@ -276,7 +272,6 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onUpdate }) => {
               </div>
             </div>
 
-            {/* Buttons */}
             <div className="flex justify-end space-x-3 pt-4">
               <button
                 type="button"

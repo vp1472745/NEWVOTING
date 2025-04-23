@@ -100,8 +100,14 @@ export const updateCandidateByOrganization = async (req, res) => {
     candidate.candidateGender = candidateGender || candidate.candidateGender;
     candidate.candidateAge = candidateAge || candidate.candidateAge;
 
+    // Handle candidateStatus
+    const validStatuses = ["pending", "approved", "rejected"];
     if (typeof candidateStatus === "boolean") {
+      candidate.candidateStatus = candidateStatus ? "approved" : "rejected";
+    } else if (validStatuses.includes(candidateStatus)) {
       candidate.candidateStatus = candidateStatus;
+    } else {
+      candidate.candidateStatus = "pending"; // Default value
     }
 
     candidate.appliedPost = appliedPost || candidate.appliedPost;

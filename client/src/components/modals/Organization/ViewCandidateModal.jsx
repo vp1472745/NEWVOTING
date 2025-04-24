@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   FiX,
   FiUser,
@@ -18,6 +18,8 @@ import PropTypes from "prop-types";
 import { motion, AnimatePresence } from "framer-motion";
 
 const ViewCandidateModal = ({ isOpen, onClose, candidate }) => {
+  const [comment, setComment] = useState("");
+
   const handleImageError = (e, imageType, imageUrl) => {
     console.error(`Failed to load ${imageType} image:`, imageUrl);
     e.target.style.display = "none";
@@ -57,6 +59,13 @@ const ViewCandidateModal = ({ isOpen, onClose, candidate }) => {
     }
   };
 
+  const handleCommentChange = (e) => setComment(e.target.value);
+
+  const handleCommentSubmit = () => {
+    // Logic for handling comment submission (e.g., send it to a backend)
+    console.log("Submitted Comment:", comment);
+  };
+
   if (!isOpen || !candidate) return null;
 
   return (
@@ -91,11 +100,7 @@ const ViewCandidateModal = ({ isOpen, onClose, candidate }) => {
                 <div className="relative my-10">
                   {candidate.candidateImage ? (
                     <img
-                      src={
-                        candidate.candidateImage.includes("http")
-                          ? candidate.candidateImage
-                          : `http://localhost:4500/${candidate.candidateImage}`
-                      }
+                      src={candidate.candidateImage}
                       alt="Candidate"
                       className="w-40 h-40 rounded-full object-cover border-4 border-gray-100 shadow-sm"
                       onError={(e) =>
@@ -119,11 +124,7 @@ const ViewCandidateModal = ({ isOpen, onClose, candidate }) => {
                       <MdPayment className="mr-1.5 text-gray-600" /> Payment Proof
                     </h3>
                     <img
-                      src={
-                        candidate.candidatePayImage.includes("http")
-                          ? candidate.candidatePayImage
-                          : `http://localhost:4500/${candidate.candidatePayImage}`
-                      }
+                      src={candidate.candidatePayImage}
                       alt="Payment Proof"
                       className="w-full max-w-xs rounded-lg object-cover border border-gray-200 shadow-xs"
                       onError={(e) =>
@@ -206,18 +207,22 @@ const ViewCandidateModal = ({ isOpen, onClose, candidate }) => {
                     </div>
                   </div>
                 </div>
+
+                {/* Agenda Section */}
+                <div className="bg-gray-50 rounded-lg p-5">
+                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
+                    <FiBriefcase className="mr-2 text-gray-600" />
+                    Agenda
+                  </h3>
+                  <div className="grid gap-4">
+                    {/* Display the agenda */}
+                    <div className="p-3  outline-none rounded-md">
+                      <p className="text-sm text-gray-800">{candidate.candidateAgenda || "No agenda provided."}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Footer */}
-          <div className="bg-white px-6 py-4 border-t flex justify-end">
-            <button
-              onClick={onClose}
-              className="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition flex items-center"
-            >
-              <FiX className="mr-2" /> Close
-            </button>
           </div>
         </motion.div>
       </div>
@@ -225,29 +230,28 @@ const ViewCandidateModal = ({ isOpen, onClose, candidate }) => {
   );
 };
 
-// Reusable detail item component
-const DetailItem = ({ icon, label, value }) => (
-  <div>
-    <div className="flex items-center text-sm text-gray-500 mb-1.5">
-      {icon}
-      <span className="ml-2.5 font-medium">{label}</span>
+const DetailItem = ({ icon, label, value }) => {
+  return (
+    <div className="flex items-center gap-3">
+      {icon && <div className="text-lg">{icon}</div>}
+      <div>
+        <p className="text-sm font-medium text-gray-600">{label}</p>
+        <p className="text-sm text-gray-800">{value || "Not provided"}</p>
+      </div>
     </div>
-    <div className="ml-7 text-gray-800 font-normal">
-      {value || <span className="text-gray-400 italic">Not provided</span>}
-    </div>
-  </div>
-);
+  );
+};
 
 ViewCandidateModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  candidate: PropTypes.object,
+  candidate: PropTypes.object.isRequired,
 };
 
 DetailItem.propTypes = {
-  icon: PropTypes.node.isRequired,
+  icon: PropTypes.node,
   label: PropTypes.string.isRequired,
-  value: PropTypes.string,
+  value: PropTypes.string.isRequired,
 };
 
 export default ViewCandidateModal;

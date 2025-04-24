@@ -14,6 +14,7 @@ import {
 import {
   Candidateprotect,
   organizationProtect,
+  voterprotect
 } from "../middlewares/authMiddleware.js"; 
 
 const router = express.Router();
@@ -27,5 +28,6 @@ router.get("/all", organizationProtect, getAllCandidates);
 router.put('/bulk-status', organizationProtect, bulkUpdateStatus);
 router.get("/:id", Candidateprotect, getCandidateById);
 router.get("/election/all", Candidateprotect, getAllElectionIdsForCandidate);
+
 
 export default router;

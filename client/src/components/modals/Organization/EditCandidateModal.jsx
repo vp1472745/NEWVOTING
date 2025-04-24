@@ -16,7 +16,8 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onUpdate }) => {
     candidateStatus: "pending",
     appliedPost: "",
     candidateImage: null,
-    candidatePayImage: null
+    candidatePayImage: null,
+    candidateAgenda: "" // Added agenda field
   });
 
   const [imagePreview, setImagePreview] = useState({
@@ -39,7 +40,8 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onUpdate }) => {
         candidateStatus: candidate.candidateStatus || "pending",
         appliedPost: candidate.appliedPost || "",
         candidateImage: candidate.candidateImage || null,
-        candidatePayImage: candidate.candidatePayImage || null
+        candidatePayImage: candidate.candidatePayImage || null,
+        candidateAgenda: candidate.candidateAgenda || "" // Set agenda if exists
       });
 
       setImagePreview({
@@ -218,12 +220,13 @@ const EditCandidateModal = ({ isOpen, onClose, candidate, onUpdate }) => {
             </div>
 
             <div className="grid grid-cols-1 gap-5">
-              {[
+              {[ 
                 { label: "Full Name", name: "candidateName", type: "text" },
                 { label: "Email", name: "candidateEmail", type: "email" },
                 { label: "Address", name: "candidateAddress", type: "text" },
                 { label: "Phone", name: "candidatePhone", type: "tel" },
-                { label: "Age", name: "candidateAge", type: "number", min: 18 }
+                { label: "Age", name: "candidateAge", type: "number", min: 18 },
+                { label: "Agenda", name: "candidateAgenda", type: "text" } // New field
               ].map(({ label, name, type, min }) => (
                 <div key={name} className="space-y-1">
                   <label className="block text-sm font-medium text-gray-700">{label}</label>

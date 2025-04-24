@@ -9,7 +9,7 @@ import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 import AdminDashboard from "./pages/Admin/AdminDashboard.jsx";
 import Organization from "./pages/Organization.jsx";
 import  CandidateDashboard from "../src/pages/CandidateDashboard.jsx"
-
+import VoterDashboard from "../src/pages/VoterDashboard.jsx"
 function App() {
   return (
     <AuthProvider>
@@ -24,6 +24,7 @@ function App() {
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/organization/dashboard" element={<Organization />} />
               <Route path="/candidate/dashboard"  element={< CandidateDashboard/>}/>
+              <Route path="/voter/dashboard" element={<VoterDashboard/>}/>
               {/* Add other routes here */}
             </Routes>
           </main>

@@ -7,7 +7,7 @@ const AddCandidateModal = ({ isOpen, onClose, onAddCandidate = () => {} }) => {
   const [selectedElection, setSelectedElection] = useState("");
   const [posts, setPosts] = useState([]);
 
-  // Add these fields to initialFormState
+  // Add the candidateAgenda field to initialFormState
   const initialFormState = {
     candidateName: "",
     candidateEmail: "",
@@ -21,6 +21,7 @@ const AddCandidateModal = ({ isOpen, onClose, onAddCandidate = () => {} }) => {
     candidateStatus: false,
     appliedPost: "",
     election: "",
+    candidateAgenda: "", // New field for agenda
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -129,9 +130,10 @@ const AddCandidateModal = ({ isOpen, onClose, onAddCandidate = () => {} }) => {
         candidatePayImage: candidatePayImageUrl,
       };
 
-      // Remove file objects from data
+      // Remove file objects and candidateStatus from data
       delete candidateData.candidateImageFile;
       delete candidateData.candidatePayImageFile;
+      delete candidateData.candidateStatus;
 
       // Send data to backend
       const response = await axios.post("/candidate/register", candidateData, {
@@ -338,50 +340,55 @@ const AddCandidateModal = ({ isOpen, onClose, onAddCandidate = () => {} }) => {
               </label>
               <input
                 type="file"
-                accept="image/*"
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    candidateImage: e.target.files[0],
-                  })
-                }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                name="candidateImage"
+                onChange={(e) => setFormData({ ...formData, candidateImage: e.target.files[0] })}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
                 required
               />
             </div>
 
-            {/* Payment Proof Image */}
+            {/* Candidate Payment Proof */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Payment Proof
+                Payment Proof Image
               </label>
               <input
                 type="file"
-                accept="image/*"
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    candidatePayImage: e.target.files[0],
-                  })
-                }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                name="candidatePayImage"
+                onChange={(e) => setFormData({ ...formData, candidatePayImage: e.target.files[0] })}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
                 required
               />
             </div>
 
-            {/* ... existing submit button ... */}
+            {/* Candidate Agenda (New field) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Candidate Agenda
+              </label>
+              <textarea
+                name="candidateAgenda"
+                value={formData.candidateAgenda}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows="4"
+                placeholder="Enter your agenda or statement"
+                required
+              />
+            </div>
           </div>
-          <div className="flex justify-end gap-3">
+
+          {/* Submit Button */}
+          <div className="flex justify-end space-x-3">
             <button
-              type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+              className="bg-gray-400 text-white px-6 py-2 rounded-lg"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+              className="bg-blue-500 text-white px-6 py-2 rounded-lg"
             >
               Add Candidate
             </button>

@@ -18,6 +18,7 @@ export const createCandidate = async (req, res) => {
       candidateAge,
       candidateStatus,
       appliedPost,
+      candidateAgenda, // ✅ Added this line
     } = req.body;
 
     const candidateExists = await Candidate.findOne({ candidateEmail });
@@ -40,6 +41,7 @@ export const createCandidate = async (req, res) => {
       candidateAge,
       candidateStatus,
       appliedPost,
+      candidateAgenda, // ✅ Added this line
     });
 
     res.status(201).json({
@@ -50,6 +52,7 @@ export const createCandidate = async (req, res) => {
         candidateEmail: newCandidate.candidateEmail,
         candidateImage: newCandidate.candidateImage,
         appliedPost: newCandidate.appliedPost,
+        candidateAgenda: newCandidate.candidateAgenda, // ✅ Include in response
         organization: newCandidate.organization,
       },
     });
@@ -57,6 +60,7 @@ export const createCandidate = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 export const updateCandidateByOrganization = async (req, res) => {
   try {
@@ -82,6 +86,7 @@ export const updateCandidateByOrganization = async (req, res) => {
       candidateAge,
       candidateStatus,
       appliedPost,
+      candidateAgenda, // ✅ Added this line
     } = req.body;
 
     candidate.candidateName = candidateName || candidate.candidateName;
@@ -95,10 +100,10 @@ export const updateCandidateByOrganization = async (req, res) => {
     candidate.candidateAddress = candidateAddress || candidate.candidateAddress;
     candidate.candidatePhone = candidatePhone || candidate.candidatePhone;
     candidate.candidateImage = candidateImage || candidate.candidateImage;
-    candidate.candidatePayImage =
-      candidatePayImage || candidate.candidatePayImage;
+    candidate.candidatePayImage = candidatePayImage || candidate.candidatePayImage;
     candidate.candidateGender = candidateGender || candidate.candidateGender;
     candidate.candidateAge = candidateAge || candidate.candidateAge;
+    candidate.candidateAgenda = candidateAgenda || candidate.candidateAgenda; // ✅ Set agenda
 
     // Handle candidateStatus
     const validStatuses = ["pending", "approved", "rejected"];
@@ -107,7 +112,7 @@ export const updateCandidateByOrganization = async (req, res) => {
     } else if (validStatuses.includes(candidateStatus)) {
       candidate.candidateStatus = candidateStatus;
     } else {
-      candidate.candidateStatus = "pending"; // Default value
+      candidate.candidateStatus = "pending";
     }
 
     candidate.appliedPost = appliedPost || candidate.appliedPost;
@@ -122,6 +127,7 @@ export const updateCandidateByOrganization = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 export const updateCandidateSelf = async (req, res) => {
   try {
@@ -138,6 +144,7 @@ export const updateCandidateSelf = async (req, res) => {
       candidateImage,
       candidateGender,
       candidateAge,
+      candidateAgenda, // ✅ Added this line
     } = req.body;
 
     if (candidateName) candidate.candidateName = candidateName;
@@ -146,6 +153,7 @@ export const updateCandidateSelf = async (req, res) => {
     if (candidateImage) candidate.candidateImage = candidateImage;
     if (candidateGender) candidate.candidateGender = candidateGender;
     if (candidateAge) candidate.candidateAge = candidateAge;
+    if (candidateAgenda) candidate.candidateAgenda = candidateAgenda; // ✅ Set agenda
 
     if (candidatePassword && candidatePassword.trim() !== "") {
       const hashed = await bcrypt.hash(candidatePassword, 10);
@@ -163,6 +171,7 @@ export const updateCandidateSelf = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 export const deleteCandidate = async (req, res) => {
   try {

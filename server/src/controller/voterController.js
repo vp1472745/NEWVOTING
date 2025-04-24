@@ -1,6 +1,7 @@
 import Voter from "../models/votersModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import Candidate from "../models/CandidateModel.js";
 
 export const registerVoter = async (req, res) => {
   try {
@@ -120,4 +121,162 @@ export const deleteVoter = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-}; 
+};
+
+
+export const voterlogin = async (req, res) => {
+  try {
+    const { voterEmail, voterPassword } = req.body;
+
+    const voter = await Voter.findOne({ voterEmail });
+    if (!voter) {
+      return res.status(400).json({ message: "Voter not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(voterPassword, voter.voterPassword);
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { id: voter._id, email: voter.voterEmail },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.status(200).json({
+      success: true,
+      token,
+      voter: {
+        _id: voter._id,
+        name: voter.voterName,
+        email: voter.voterEmail,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+
+export const getVoterById = async (req, res) => {
+  try {
+    const voterId = req.params.id;
+    const voter = await Voter.findById(voterId);
+    
+    if (!voter) {
+      return res.status(404).json({ success: false, message: "Voter not found" });
+    }
+
+    res.status(200).json({ success: true, voter });
+  } catch (error) {
+    console.error("Error fetching voter:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const updateVoterProfile = async (req, res) => {
+  try {
+    const voterId = req.params.id;
+    const {
+      voterName,
+      voterEmail,
+      voterPhone,
+      voterAddress,
+      voterGender,
+      voterAge,
+    } = req.body;
+
+    const updatedVoter = await Voter.findByIdAndUpdate(
+      voterId,
+      {
+        voterName,
+        voterEmail,
+        voterPhone,
+        voterAddress,
+        voterGender,
+        voterAge,
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedVoter) {
+      return res.status(404).json({ success: false, message: "Voter not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      voter: updatedVoter,
+      message: "Voter profile updated successfully",
+    });
+  } catch (error) {
+    console.error("Error updating voter profile:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+
+
+
+
+export const getAllCandidates = async (req, res) => {
+  try {
+    // Get voter ID from the authenticated user (assuming you set req.user in voterprotect middleware)
+    const voterId = req.user && req.user.id ? req.user.id : null;
+    if (!voterId) {
+      return res.status(401).json({ success: false, message: "Unauthorized: Voter not found in request." });
+    }
+
+    // Find the voter to get their organization
+    const voter = await Voter.findById(voterId);
+    if (!voter || !voter.organization) {
+      return res.status(404).json({ success: false, message: "Voter or organization not found." });
+    }
+
+    // Fetch candidates for the voter's organization
+    const candidates = await Candidate.find({ organization: voter.organization })
+      .populate("election", "electionName")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      candidates: candidates || [],
+    });
+  } catch (error) {
+    console.error("Error fetching candidates:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Controller for voter to get all candidates of their organization
+export const getCandidatesForVoter = async (req, res) => {
+  try {
+    // Get voter ID from JWT (set by voterprotect middleware)
+    const voterId = req.user && req.user.id ? req.user.id : null;
+    if (!voterId) {
+      return res.status(401).json({ success: false, message: "Unauthorized: Voter not found in request." });
+    }
+
+    // Find the voter to get their organization
+    const voter = await Voter.findById(voterId);
+    if (!voter || !voter.organization) {
+      return res.status(404).json({ success: false, message: "Voter or organization not found." });
+    }
+
+    // Fetch candidates for the voter's organization
+    const candidates = await Candidate.find({ organization: voter.organization })
+      .populate("election", "electionName")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      candidates: candidates || [],
+    });
+  } catch (error) {
+    console.error("Error fetching candidates for voter:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

@@ -60,7 +60,16 @@ const Login = () => {
         localStorage.setItem(userIdKey, response.data[userIdKey]);
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user", JSON.stringify(response.data));
-
+        // --- Fix: Save voterId robustly ---
+        if (userType === "voter") {
+          const voterId =
+            response.data.voter?._id ||
+            response.data.voterId ||
+            (typeof response.data.voter === "string" ? response.data.voter : "");
+          if (voterId) {
+            localStorage.setItem("voterId", voterId);
+          }
+        }
         // ✅ Save additional data if needed
         if (userType === "candidate") {
           localStorage.setItem("candidateName", response.data.candidate.candidateName);

@@ -33,7 +33,7 @@ const electionSchema = new mongoose.Schema({
         positionName: {
           type: String,
           required: true,
-        },
+        },  
         positionDescription: {
           type: String,
           required: true,

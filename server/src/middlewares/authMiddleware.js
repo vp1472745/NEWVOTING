@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import Admin from "../models/adminModel.js";
 import Organization from "../models/organizationModel.js";
 import Candidate from "../models/CandidateModel.js";
+import Voter from "../models/votersModel.js";
 
 export const adminProtect = async (req, res, next) => {
   try {
@@ -111,25 +112,24 @@ export const Candidateprotect = async (req, res, next) => {
   }
 };
 
-export const eitherProtect = async (req, res, next) => {
-  try {
-    const token = req.headers.authorization.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({ message: "Not authorized, no token" });
-    }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const organization = await Organization.findById(decoded.id);
-    const candidate = await Candidate.findById(decoded.id);
-
-    if (organization || candidate) {
-      req.user = organization || candidate;
+export const voterprotect = async (req, res, next) => {
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      token = req.headers.authorization.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // Attach voter info to req.user
+      req.user = { id: decoded.id, email: decoded.email };
       next();
-    } else {
-      res.status(401).json({ message: "Not authorized" });
+    } catch (error) {
+      return res.status(401).json({ message: "Not authorized, token failed" });
     }
-  } catch (error) {
-    res.status(401).json({ message: "Not authorized, token failed" });
+  } else {
+    return res.status(401).json({ message: "Not authorized, no token" });
   }
 };

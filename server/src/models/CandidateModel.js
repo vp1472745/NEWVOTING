@@ -55,6 +55,10 @@ const candidateSchema = new mongoose.Schema({
   appliedPost: {
     type: String,
     required: true, 
+  },
+  candidateAgenda: {
+    type: String,
+    required: true, 
   }
 },{timestamps:true});
 

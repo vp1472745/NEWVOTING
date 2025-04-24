@@ -132,19 +132,20 @@ const VotersTab = () => {
       </div>
 
       <div className="flex gap-4">
-        <div className="relative w-full max-w-md">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <RiUserSearchLine className="text-gray-400" />
-          </div>
-          <input
-            type="text"
-            placeholder="Search voters..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-      </div>
+  <div className="w-full max-w-md">
+    <div className="flex items-center border rounded-lg shadow-sm focus-within:ring-2 focus-within:ring-blue-500 px-3">
+      <RiUserSearchLine className="text-gray-400 mr-2" />
+      <input
+        type="text"
+        placeholder="Search voters..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="w-full py-2 focus:outline-none"
+      />
+    </div>
+  </div>
+</div>
+
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">

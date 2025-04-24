@@ -7,7 +7,7 @@ import adminRoutes from "./src/routes/adminRoutes.js";
 import cookieParser from "cookie-parser";
 import orgRoutes from "./src/routes/organizationRoutes.js";
 import candidateRoutes from "./src/routes/candidateRoutes.js";
-// import voterRoutes from "./src/routes/voterRoutes.js";
+import voterRoutes from "./src/routes/VoterRoutes.js";
 import electionRoutes from "./src/routes/electionRoutes.js";
 
 
@@ -27,9 +27,9 @@ app.use(morgan("dev"));
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/election", electionRoutes);
-app.use("/api/org",orgRoutes);
-app.use("/api/candidate",candidateRoutes);
-
+app.use("/api/org", orgRoutes);
+app.use("/api/candidate", candidateRoutes);
+app.use("/api/voter", voterRoutes); // Fixed this line
 
 app.get("/", (req, res) => {
   res.send("server connected");

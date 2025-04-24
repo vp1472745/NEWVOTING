@@ -11,13 +11,13 @@ import {
   FaBars,
 } from "react-icons/fa";
 import useScrollToTop from "../hooks/useScrollToTop.jsx";
-
+import { MdOutlineLeaderboard } from "react-icons/md";
 import EditOrgModal from "../components/modals/Organization/EditOrgModal.jsx";
 import LogoutModal from "../components/modals/LogoutModal.jsx";
 import ElectionsTab from "../components/organizationTabs/ElectionsTab";
 import VotersTab from "../components/organizationTabs/VotersTab";
 import CandidatesTab from "../components/organizationTabs/CandidateTab.jsx";
-
+import TabElectionAdministration from "../components/organizationTabs/TabElectionAdministration.jsx";
 const Organization = () => {
   useScrollToTop(); // Add auto-scroll to top functionality
 
@@ -90,10 +90,12 @@ const Organization = () => {
     { name: "Elections", icon: <FaVoteYea />, id: "elections" },
     { name: "Candidates", icon: <FaUserTie />, id: "candidates" },
     { name: "Voters", icon: <FaUsers />, id: "voters" },
+    { name: "Election Administrations", icon: <MdOutlineLeaderboard />, id: "electionAdministrations" },
   ];
 
   return (
     <div className="min-h-screen bg-gray-100">
+    
       {/* Mobile Sidebar Toggle Button - Only visible on mobile */}
       <button
         onClick={toggleSidebar}
@@ -111,6 +113,7 @@ const Organization = () => {
               : "-translate-x-full lg:translate-x-0"
           }`}
         >
+            <h1 className="text-2xl text-center mt-6 font-bold">Organization</h1>
           <div className="p-4 border-b">
             <img
               src={organization?.orgLogo || "/default-logo.png"}
@@ -137,6 +140,7 @@ const Organization = () => {
         </aside>
 
         <main className="flex-1 p-6 overflow-auto lg:mt-0 mt-10">
+          
           {activeTab === "dashboard" && organization && (
             <div className="bg-white p-4 sm:p-6 rounded shadow">
               <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
@@ -213,6 +217,7 @@ const Organization = () => {
           {activeTab === "elections" && <ElectionsTab />}
           {activeTab === "candidates" && <CandidatesTab />}
           {activeTab === "voters" && <VotersTab />}
+          {activeTab === "electionAdministrations" && <TabElectionAdministration />}
         </main>
 
         <EditOrgModal

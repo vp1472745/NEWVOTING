@@ -22,13 +22,23 @@ const AddElectionForm = ({ isOpen, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("/election/create", formData);
+      await axios.post('/election/create', {
+        ...formData,
+        electionStatus: 'Not Started'
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       setFormData(initialFormState); // Reset form to initial state
-      onClose();
     } catch (error) {
       console.error("Create election error:", error);
+    } finally {
+      onClose(); // Always close modal after submit
     }
   };
+  
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

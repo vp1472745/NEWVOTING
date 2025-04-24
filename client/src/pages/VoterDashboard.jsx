@@ -70,14 +70,14 @@ const VoterDashboard = () => {
         {/* Sidebar */}
         <aside
           ref={sidebarRef}
-          className={`fixed lg:static lg:block w-64 bg-white shadow transition-all duration-300 h-full ${
+          className={`fixed lg:static lg:block w-64 bg-white shadow transition-all duration-300 h-full z-10 ${
             isSidebarOpen
               ? "translate-x-0"
               : "-translate-x-full lg:translate-x-0"
           }`}
         >
           <div className="p-4 border-b">
-            <h2 className="text-xl font-semibold text-gray-800">Voter Dashboard</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mt-12">Voter Dashboard</h2>
           </div>
           <nav className="mt-4 h-[calc(100%-12rem)] overflow-y-auto">
             {menuItems.map((item) => (

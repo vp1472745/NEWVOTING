@@ -57,10 +57,25 @@ const ElectionsTab = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this election?")) {
       try {
-        await axios.delete(`/election/delete/${id}`);
-        fetchElections();
+        const response = await axios.delete(`/election/delete/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.data.success) {
+          fetchElections();
+        } else {
+          setError(response.data.message || "Failed to delete election");
+        }
       } catch (err) {
-        console.error("Delete error:", err);
+        console.error("Delete error details:", {
+          status: err.response?.status,
+          data: err.response?.data,
+          config: err.config
+        });
+        setError(err.response?.data?.message || "Failed to delete election");
       }
     }
   };

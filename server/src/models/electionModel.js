@@ -24,8 +24,9 @@ const electionSchema = new mongoose.Schema({
     required: true,
   },
   electionStatus: {
-    type: Boolean,
-    required: true, 
+    type: String,
+    enum: ['Not Started', 'Started', 'Polling', 'Completed', 'Results Declared'],
+    default: 'Not Started'
   },
   electionPosition: {
     type: [

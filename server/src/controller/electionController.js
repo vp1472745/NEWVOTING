@@ -9,28 +9,35 @@ export const createElection = async (req, res, next) => {
       electionStartTime,
       electionEndTime,
       electionPosition,
+      electionStatus = 'Not Started' // Default value
     } = req.body;
 
-    const organizationId = req.organization?._id || req.body.organizationId; // depend karta hai flow pe
+    // Validate status if provided
+    if (electionStatus && !['Not Started', 'Started', 'Polling', 'Completed', 'Results Declared'].includes(electionStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid election status'
+      });
+    }
+
+    const organizationId = req.organization?._id || req.body.organizationId;
 
     if (!organizationId) {
       return res.status(400).json({ success: false, message: "Organization ID is required" });
     }
-
 
     const organization = await Organization.findById(organizationId);
     if (!organization) {
       return res.status(404).json({ success: false, message: "Organization not found" });
     }
 
-    
     const newElection = new Election({
       Organization: organizationId,
       electionName,
       electionDate,
       electionStartTime,
       electionEndTime,
-      electionStatus: false, // default status inactive
+      electionStatus, // Now properly validated
       electionPosition,
     });
 
@@ -47,99 +54,65 @@ export const createElection = async (req, res, next) => {
   }
 };
 
-export const updateElection = async (req, res, next) => {
+export const updateElection = async (req, res) => {
   try {
-    const {
-      electionName,
-      electionDate,
-      electionStartTime,
-      electionEndTime,
-      electionPosition,
-    } = req.body;
-
-    const election = await Election.findById(req.params.id);
+    const { electionName, electionDate, electionStartTime, electionEndTime, electionStatus, electionPosition, Organization } = req.body;
+    
+    // Find and update the election
+    const election = await Election.findByIdAndUpdate(
+      req.params.id,
+      {
+        electionName,
+        electionDate: new Date(electionDate),
+        electionStartTime,
+        electionEndTime,
+        electionStatus,
+        electionPosition,
+        Organization
+      },
+      { new: true, runValidators: true }
+    );
 
     if (!election) {
       return res.status(404).json({
         success: false,
-        message: "Election not found"
+        message: 'Election not found'
       });
     }
-
-    // Check if organization owns this election
-    if (election.Organization.toString() !== req.organization._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to update this election"
-      });
-    }
-
-    // Don't allow updates if election is active
-    if (election.electionStatus) {
-      return res.status(400).json({
-        success: false,
-        message: "Cannot update active election"
-      });
-    }
-
-    // Update fields if provided
-    if (electionName) election.electionName = electionName;
-    if (electionDate) election.electionDate = electionDate;
-    if (electionStartTime) election.electionStartTime = electionStartTime;
-    if (electionEndTime) election.electionEndTime = electionEndTime;
-    if (electionPosition) election.electionPosition = electionPosition;
-
-    const updatedElection = await election.save();
 
     res.status(200).json({
       success: true,
-      message: "Election updated successfully",
-      election: updatedElection
+      data: election
     });
-
+    
   } catch (error) {
-    console.error("Error updating election:", error);
-    next(error);
+    console.error('Update error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating election'
+    });
   }
 };
 
-export const deleteElection = async (req, res, next) => {
+export const deleteElection = async (req, res) => {
   try {
-    const election = await Election.findById(req.params.id);
-
+    const election = await Election.findByIdAndDelete(req.params.id);
     if (!election) {
       return res.status(404).json({
         success: false,
-        message: "Election not found"
+        message: 'Election not found'
       });
     }
-
-    // Check if organization owns this election
-    if (election.Organization.toString() !== req.organization._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to delete this election"
-      });
-    }
-
-    // Don't allow deletion if election is active
-    if (election.electionStatus) {
-      return res.status(400).json({
-        success: false,
-        message: "Cannot delete active election"
-      });
-    }
-
-    await Election.findByIdAndDelete(req.params.id);
-
     res.status(200).json({
       success: true,
-      message: "Election deleted successfully"
+      message: 'Election deleted successfully'
     });
-
   } catch (error) {
-    console.error("Error deleting election:", error);
-    next(error);
+    console.error('Delete error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting election'
+    });
   }
 };
 
@@ -189,6 +162,5 @@ export const getElectionById = async (req, res, next) => {
     next(error);
   }
 };
-
 
 

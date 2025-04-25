@@ -133,3 +133,47 @@ export const voterprotect = async (req, res, next) => {
     return res.status(401).json({ message: "Not authorized, no token" });
   }
 };
+
+
+export const pollingProtect = async (req, res, next) => {
+  try {
+    const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Authorization token is missing"
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Check if it's a candidate
+    const candidate = await Candidate.findById(decoded.key);
+    if (candidate) {
+      req.user = candidate;
+      req.userType = 'candidate';
+      return next();
+    }
+
+    // Check if it's a voter
+    const voter = await Voter.findById(decoded.key);
+    if (voter) {
+      req.user = voter;
+      req.userType = 'voter';
+      return next();
+    }
+
+    return res.status(401).json({
+      success: false,
+      message: "User not found"
+    });
+
+  } catch (error) {
+    console.error("Polling protect error:", error);
+    return res.status(401).json({
+      success: false,
+      message: "Invalid token"
+    });
+  }
+};

@@ -9,6 +9,7 @@ import orgRoutes from "./src/routes/organizationRoutes.js";
 import candidateRoutes from "./src/routes/candidateRoutes.js";
 import voterRoutes from "./src/routes/VoterRoutes.js";
 import electionRoutes from "./src/routes/electionRoutes.js";
+import pollingRoutes from "./src/routes/pollingRoutes.js";
 
 
 
@@ -29,6 +30,7 @@ app.use("/api/election", electionRoutes);
 app.use("/api/org", orgRoutes);
 app.use("/api/candidate", candidateRoutes);
 app.use("/api/voter", voterRoutes); 
+app.use("/api/polling", pollingRoutes);
 
 
 app.get("/", (req, res) => {

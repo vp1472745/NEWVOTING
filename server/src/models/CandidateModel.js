@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 const candidateSchema = new mongoose.Schema({
   organization: {
     type: mongoose.Schema.Types.ObjectId,
@@ -60,7 +61,9 @@ const candidateSchema = new mongoose.Schema({
     type: String,
     required: true, 
   }
-},{timestamps:true});
+}, { timestamps: true });
 
-const Candidate = mongoose.model("Candidate", candidateSchema);
+// Check if the model exists before creating a new one
+const Candidate = mongoose.models.Candidate || mongoose.model("Candidate", candidateSchema);
+
 export default Candidate;

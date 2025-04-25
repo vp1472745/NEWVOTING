@@ -163,4 +163,23 @@ export const getElectionById = async (req, res, next) => {
   }
 };
 
+export const getActiveElections = async (req, res) => {
+  try {
+    const activeElections = await Election.find({
+      electionStatus: { $in: ['Started', 'Polling'] }
+    }).populate('Organization', 'orgName');
+
+    res.status(200).json({
+      success: true,
+      elections: activeElections
+    });
+  } catch (error) {
+    console.error('Error fetching active elections:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch active elections'
+    });
+  }
+};
+
 

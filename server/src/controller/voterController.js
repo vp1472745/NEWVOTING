@@ -280,3 +280,38 @@ export const getCandidatesForVoter = async (req, res) => {
   }
 };
 
+export const getVoterProfile = async (req, res) => {
+  try {
+    // Get voter from auth middleware
+    const voter = await Voter.findById(req.user._id)
+      .populate('organization', '_id orgName')
+      .select('-voterPassword');
+
+    if (!voter) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Voter not found" 
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      voter: {
+        _id: voter._id,
+        name: voter.voterName,
+        email: voter.voterEmail,
+        organizationId: voter.organization._id,
+        organizationName: voter.organization.orgName,
+        voterStatus: voter.voterStatus,
+        voterVoted: voter.voterVoted
+      }
+    });
+  } catch (error) {
+    console.error("Error in getVoterProfile:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Internal server error" 
+    });
+  }
+};
+

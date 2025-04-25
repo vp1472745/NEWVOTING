@@ -14,7 +14,7 @@ import {
 import {
   Candidateprotect,
   organizationProtect,
-  voterprotect
+  
 } from "../middlewares/authMiddleware.js"; 
 
 const router = express.Router();

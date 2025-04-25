@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "../config/axois"; // Add this import
+import { toast } from 'react-toastify';
 import {
   FaHome,
   FaVoteYea,
@@ -14,8 +16,30 @@ import PollingTab from "../components/voterTab/PollingTab";
 const VoterDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [voterData, setVoterData] = useState(null); // Add voter data state
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
+
+  // Add voter data fetch on component mount
+  useEffect(() => {
+    const fetchVoterData = async () => {
+      try {
+        const res = await axios.get('/api/voter/profile', { // Ensure correct endpoint
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (res.data.success) {
+          setVoterData(res.data.voter);
+        }
+      } catch (err) {
+        console.error('Failed to fetch voter data:', err);
+        toast.error('Failed to load voter profile');
+      }
+    };
+
+    fetchVoterData();
+  }, []);
 
   // Handle click outside sidebar
   useEffect(() => {
@@ -108,9 +132,9 @@ const VoterDashboard = () => {
 
         {/* Main Content */}
         <main className="flex-1 p-6 overflow-auto lg:mt-0 mt-10">
-          {activeTab === "dashboard" && <DashboardTab />}
+          {activeTab === "dashboard" && <DashboardTab voterData={voterData} />}
           {activeTab === "viewCandidate" && <ViewTab />}
-          {activeTab === "polling" && <PollingTab />}
+          {activeTab === "polling" && <PollingTab voterData={voterData} />}
         </main>
       </div>
     </div>

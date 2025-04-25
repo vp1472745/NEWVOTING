@@ -32,7 +32,7 @@ const VotersTab = () => {
     try {
       const [voterRes, electionRes] = await Promise.all([
         axios.get("/org/voter/all"),
-        axios.get("/org/election/all"),
+        axios.get("/election/all"),
       ]);
 
       if (voterRes.data.success && electionRes.data.success) {

@@ -138,42 +138,42 @@ export const voterprotect = async (req, res, next) => {
 export const pollingProtect = async (req, res, next) => {
   try {
     const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
-    
+
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Authorization token is missing"
+        message: "Authorization token is missing",
       });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // Check if it's a candidate
-    const candidate = await Candidate.findById(decoded.key);
-    if (candidate) {
-      req.user = candidate;
-      req.userType = 'candidate';
-      return next();
+    console.log("Decoded Token:", decoded);
+
+    const { id, role } = decoded;
+
+    let user;
+
+    if (role === "candidate") {
+      user = await Candidate.findById(id);
+    } else if (role === "voter") {
+      user = await Voter.findById(id);
     }
 
-    // Check if it's a voter
-    const voter = await Voter.findById(decoded.key);
-    if (voter) {
-      req.user = voter;
-      req.userType = 'voter';
-      return next();
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
-    return res.status(401).json({
-      success: false,
-      message: "User not found"
-    });
+    req.user = { ...user._doc, id: user._id.toString(), role }; // 👈 Add role to req.user
+    next();
 
   } catch (error) {
     console.error("Polling protect error:", error);
     return res.status(401).json({
       success: false,
-      message: "Invalid token"
+      message: "Invalid token",
     });
   }
 };

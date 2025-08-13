@@ -212,7 +212,7 @@ export const loginCandidate = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: candidate._id, role: "candidate" },
+      { id: candidate._id, role: "candidate" }, // ✅ Include role
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -228,7 +228,7 @@ export const loginCandidate = async (req, res) => {
       .json({
         success: true,
         message: "Login successful",
-        candidateId: candidate._id, // ✅ Add this
+        candidateId: candidate._id,
         candidate: {
           _id: candidate._id,
           candidateName: candidate.candidateName,
@@ -241,6 +241,7 @@ export const loginCandidate = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 
 export const getAllCandidates = async (req, res) => {

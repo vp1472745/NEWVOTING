@@ -5,6 +5,14 @@ import AddElectionForm from "../modals/Organization/AddElectionForm";
 import ViewElectionModal from "../modals/Organization/ViewElectionModal";
 import EditElectionModal from "../modals/Organization/EditElectionModal";
 
+const statusClasses = {
+  "Not Started": "bg-yellow-100 text-yellow-700",
+  "Started": "bg-blue-100 text-blue-700",
+  "Polling": "bg-purple-100 text-purple-700",
+  "Completed": "bg-gray-100 text-gray-700",
+  "Results Declared": "bg-green-100 text-green-700",
+};
+
 const ElectionsTab = () => {
   const [elections, setElections] = useState([]);
   const [filteredElections, setFilteredElections] = useState([]);
@@ -37,7 +45,7 @@ const ElectionsTab = () => {
   const filterElections = () => {
     const lowerSearch = searchQuery.toLowerCase();
     const filtered = elections.filter((election) =>
-      `${election.electionName} ${new Date(election.electionDate).toLocaleDateString()} ${election.electionStartTime} ${election.electionEndTime} ${election.electionStatus ? "active" : "inactive"} ${election.electionPosition.length}`
+      `${election.electionName} ${new Date(election.electionDate).toLocaleDateString()} ${election.electionStartTime} ${election.electionEndTime} ${election.electionStatus} ${election.electionPosition.length}`
         .toLowerCase()
         .includes(lowerSearch)
     );
@@ -67,24 +75,22 @@ const ElectionsTab = () => {
         if (response.data.success) {
           fetchElections();
         } else {
-          setError(response.data.message || "Failed to delete election");
+          alert(response.data.message || "Failed to delete election");
         }
       } catch (err) {
-        console.error("Delete error details:", {
-          status: err.response?.status,
-          data: err.response?.data,
-          config: err.config
-        });
-        setError(err.response?.data?.message || "Failed to delete election");
+        console.error("Delete error:", err);
+        alert(err.response?.data?.message || "Failed to delete election");
       }
     }
   };
 
-  if (loading) return (
-    <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -179,14 +185,9 @@ const ElectionsTab = () => {
                     <div className="flex items-center">
                       <span className="font-medium text-gray-700 w-24">Status:</span>
                       <span
-                        className={`inline-block px-2 py-1 text-xs rounded-full font-medium 
-                          ${
-                            election.electionStatus
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
-                          }`}
+                        className={`inline-block px-2 py-1 text-xs rounded-full font-medium ${statusClasses[election.electionStatus] || "bg-gray-100 text-gray-700"}`}
                       >
-                        {election.electionStatus ? "Active" : "Inactive"}
+                        {election.electionStatus}
                       </span>
                     </div>
                     <div className="flex items-center">

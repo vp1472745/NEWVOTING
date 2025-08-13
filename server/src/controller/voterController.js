@@ -130,33 +130,44 @@ export const voterlogin = async (req, res) => {
 
     const voter = await Voter.findOne({ voterEmail });
     if (!voter) {
-      return res.status(400).json({ message: "Voter not found" });
+      return res.status(400).json({ success: false, message: "Voter not found" });
     }
 
     const isPasswordValid = await bcrypt.compare(voterPassword, voter.voterPassword);
     if (!isPasswordValid) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ success: false, message: "Invalid credentials" });
     }
 
     const token = jwt.sign(
-      { id: voter._id, email: voter.voterEmail },
+      { id: voter._id, role: "voter" }, // ✅ Include role here too
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "7d" }
     );
 
-    res.status(200).json({
-      success: true,
-      token,
-      voter: {
-        _id: voter._id,
-        name: voter.voterName,
-        email: voter.voterEmail,
-      },
-    });
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      })
+      .status(200)
+      .json({
+        success: true,
+        message: "Login successful",
+        voterId: voter._id,
+        voter: {
+          _id: voter._id,
+          voterName: voter.voterName,
+          voterEmail: voter.voterEmail,
+        },
+      });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 
 

@@ -26,8 +26,8 @@ const pollingSchema = new mongoose.Schema({
   },
   pollingStatus: {
     type: String,
-    enum: ['Not-Started','Active', 'Completed'],
-    default: 'active',
+    enum: ['Not-Started','Started', 'Completed'],
+    default: 'Not-Started',
   },
   nominatedCandidate:[
     {

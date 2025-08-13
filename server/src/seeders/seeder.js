@@ -61,7 +61,7 @@ const electionData = [
     electionDate: new Date("2024-05-15"),
     electionStartTime: "08:00",
     electionEndTime: "18:00",
-    electionStatus: true,
+    electionStatus: "Not Started", // ✅ enum value me se ek string
     electionPosition: [
       {
         positionName: "President",
@@ -75,6 +75,7 @@ const electionData = [
   },
 ];
 
+
 const candidateData = [
   {
     candidateName: "John Doe",
@@ -86,8 +87,9 @@ const candidateData = [
     candidatePayImage: "https://placehold.co/400x400?text=John+Doe+Payment",
     candidateGender: "Male",
     candidateAge: 35,
-    candidateStatus: true,
+    candidateStatus: "approved", // ✅ enum value
     appliedPost: "President",
+    candidateAgenda: "Improve education and healthcare" // ✅ required
   },
   {
     candidateName: "Jane Smith",
@@ -99,10 +101,12 @@ const candidateData = [
     candidatePayImage: "https://placehold.co/400x400?text=Jane+Smith+Payment",
     candidateGender: "Female",
     candidateAge: 32,
-    candidateStatus: true,
+    candidateStatus: "pending", // ✅ enum value
     appliedPost: "Vice President",
-  },
+    candidateAgenda: "Focus on environmental protection" // ✅ required
+  }
 ];
+
 
 const voterData = [
   {

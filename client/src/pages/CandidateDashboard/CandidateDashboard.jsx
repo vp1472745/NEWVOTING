@@ -83,134 +83,210 @@ const CandidateDashboard = () => {
 
   // Render edit form function for passing to main content
   const renderEditForm = () => (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Name
-        </label>
-        <input
-          type="text"
-          name="candidateName"
-          value={formData.candidateName}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        />
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto space-y-6"
+    >
+      <h2 className="text-2xl font-bold text-blue-700 mb-6">Edit Profile</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Name
+          </label>
+          <input
+            type="text"
+            name="candidateName"
+            value={formData.candidateName}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
+          <input
+            type="email"
+            name="candidateEmail"
+            value={formData.candidateEmail}
+            disabled
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Address
+          </label>
+          <input
+            type="text"
+            name="candidateAddress"
+            value={formData.candidateAddress}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Phone
+          </label>
+          <input
+            type="text"
+            name="candidatePhone"
+            value={formData.candidatePhone}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Gender
+          </label>
+          <input
+            type="text"
+            name="candidateGender"
+            value={formData.candidateGender}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Age
+          </label>
+          <input
+            type="number"
+            name="candidateAge"
+            value={formData.candidateAge}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Applied Post
+          </label>
+          <input
+            type="text"
+            name="appliedPost"
+            value={formData.appliedPost}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Agenda
+          </label>
+          <input
+            type="text"
+            name="candidateAgenda"
+            value={formData.candidateAgenda}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+        </div>
       </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Email
-        </label>
-        <input
-          type="email"
-          name="candidateEmail"
-          value={formData.candidateEmail}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Profile Image
+          </label>
+          {formData.candidateImage && (
+            <img
+              src={formData.candidateImage}
+              alt="Candidate"
+              className="w-24 h-24 object-cover rounded-full mb-2 border"
+            />
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={async (e) => {
+              const file = e.target.files[0];
+              if (file) {
+                const data = new FormData();
+                data.append("file", file);
+                data.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+
+                try {
+                  const res = await fetch(
+                    `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+                    {
+                      method: "POST",
+                      body: data,
+                    }
+                  );
+                  const result = await res.json();
+                  setFormData((prev) => ({
+                    ...prev,
+                    candidateImage: result.secure_url,
+                  }));
+                } catch {
+                  alert("Image upload failed");
+                }
+              }
+            }}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Payment Image
+          </label>
+          {formData.candidatePayImage && (
+            <img
+              src={formData.candidatePayImage}
+              alt="Payment"
+              className="w-24 h-24 object-cover rounded mb-2 border"
+            />
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={async (e) => {
+              const file = e.target.files[0];
+              if (file) {
+                const data = new FormData();
+                data.append("file", file);
+                data.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+
+                try {
+                  const res = await fetch(
+                    `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+                    {
+                      method: "POST",
+                      body: data,
+                    }
+                  );
+                  const result = await res.json();
+                  setFormData((prev) => ({
+                    ...prev,
+                    candidatePayImage: result.secure_url,
+                  }));
+                } catch {
+                  alert("Image upload failed");
+                }
+              }
+            }}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+        </div>
       </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Address
-        </label>
-        <input
-          type="text"
-          name="candidateAddress"
-          value={formData.candidateAddress}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        />
+      <div className="flex gap-4 mt-8">
+        <button
+          type="submit"
+          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold"
+        >
+          Save Changes
+        </button>
+        <button
+          type="button"
+          className="px-6 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 font-semibold"
+          onClick={() => setIsEditing(false)}
+        >
+          Cancel
+        </button>
       </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Phone
-        </label>
-        <input
-          type="text"
-          name="candidatePhone"
-          value={formData.candidatePhone}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Gender
-        </label>
-        <input
-          type="text"
-          name="candidateGender"
-          value={formData.candidateGender}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Age
-        </label>
-        <input
-          type="number"
-          name="candidateAge"
-          value={formData.candidateAge}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Image URL
-        </label>
-        <input
-          type="text"
-          name="candidateImage"
-          value={formData.candidateImage}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Payment Image URL
-        </label>
-        <input
-          type="text"
-          name="candidatePayImage"
-          value={formData.candidatePayImage}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Applied Post
-        </label>
-        <input
-          type="text"
-          name="appliedPost"
-          value={formData.appliedPost}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Agenda
-        </label>
-        <input
-          type="text"
-          name="candidateAgenda"
-          value={formData.candidateAgenda}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        />
-      </div>
-      {/* Add other fields as needed */}
-      <button
-        type="submit"
-        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-      >
-        Save Changes
-      </button>
     </form>
   );
 

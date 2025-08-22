@@ -1,4 +1,5 @@
 import React from "react";
+import CandidateVoting from "./CandidateVoting.jsx";
 
 const CandidateMainContent = ({ active, candidateData, ...props }) => {
   if (active === "profile") {
@@ -99,6 +100,17 @@ const CandidateMainContent = ({ active, candidateData, ...props }) => {
       <div className="p-8">
         <h2 className="text-2xl font-bold mb-4 text-blue-700">Results</h2>
         <p>Results will be displayed here.</p>
+      </div>
+    );
+  }
+  if (active === "voting") {
+    return (
+      <div className="p-8">
+        <h2 className="text-2xl font-bold mb-4 text-blue-700">Voting</h2>
+        <CandidateVoting
+          electionId={candidateData?.election}
+          candidateId={candidateData?._id}
+        />
       </div>
     );
   }

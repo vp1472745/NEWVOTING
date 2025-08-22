@@ -27,6 +27,14 @@ const CandidateSidebar = ({ active, onNavigate }) => (
           Results
         </button>
       </li>
+       <li>
+        <button
+          className={`w-full text-left ${active === "results" ? "font-bold text-blue-600" : ""}`}
+          onClick={() => onNavigate("voting")}
+        >
+        Voting
+        </button>
+      </li>
     </ul>
   </div>
 );

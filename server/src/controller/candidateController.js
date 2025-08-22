@@ -320,3 +320,19 @@ export const getAllElectionIdsForCandidate = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getCandidateProfile = async (req, res) => {
+  try {
+    const candidate = await Candidate.findById(req.candidate._id);
+    if (!candidate) {
+      return res.status(404).json({ success: false, message: "Candidate not found" });
+    }
+    res.status(200).json({
+      success: true,
+      candidate,
+    });
+  } catch (error) {
+    console.error("Error in getCandidateProfile:", error);
+    res.status(500).json({ success: false, message: "Server error: " + error.message });
+  }
+};

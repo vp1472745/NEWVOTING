@@ -8,7 +8,7 @@ import Login from "./pages/Login";
 import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 import AdminDashboard from "./pages/Admin/AdminDashboard.jsx";
 import Organization from "./pages/Organization.jsx";
-import CandidateDashboard from "../src/pages/CandidateDashboard.jsx";
+import CandidateDashboard from "../src/pages/CandidateDashboard/CandidateDashboard.jsx";
 import VoterDashboard from "../src/pages/VoterDashboard.jsx";
 // import CandidateApplyPage from "./pages/CandidateApplyPage";
 import PublicElectionPage from "./pages/PublicElectionPage.jsx"; // ya jis naam se aapne page banaya hai

@@ -8,7 +8,8 @@ import {
   getAllCandidates,
   bulkUpdateStatus,
   getCandidateById,
-  getAllElectionIdsForCandidate
+  getAllElectionIdsForCandidate,
+  getCandidateProfile
 } from "../controller/candidateController.js";
 
 import {
@@ -26,8 +27,10 @@ router.put("/update/:id", organizationProtect, updateCandidateByOrganization);
 router.delete("/:id", organizationProtect, deleteCandidate);
 router.get("/all", organizationProtect, getAllCandidates);
 router.put('/bulk-status', organizationProtect, bulkUpdateStatus);
+router.get("/profile", Candidateprotect, getCandidateProfile);
 router.get("/:id", Candidateprotect, getCandidateById);
 router.get("/election/all", Candidateprotect, getAllElectionIdsForCandidate);
+
 
 
 export default router;

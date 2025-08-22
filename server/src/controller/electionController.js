@@ -1,6 +1,6 @@
 import Election from "../models/electionModel.js";
 import Organization from "../models/organizationModel.js";
-import Candidate from "../models/candidateModel.js";
+// import Candidate from "../models/candidateModel.js";
 import axios from "axios";
 
 export const createElection = async (req, res, next) => {
@@ -196,8 +196,9 @@ export const getElectionById = async (req, res, next) => {
       });
     }
 
-    // Verify organization ownership
+    // Only check organization if req.organization exists
     if (
+      req.organization &&
       election.Organization._id.toString() !== req.organization._id.toString()
     ) {
       return res.status(403).json({

@@ -21,6 +21,6 @@ router.post("/create", organizationProtect, createElection);
 router.put("/update/:id", organizationProtect, updateElection);
 router.delete("/delete/:id", organizationProtect, deleteElection);
 router.get("/all",organizationProtect, getAllElections);
-router.get("/:id", organizationProtect, getElectionById);
+router.get("/:id", getElectionById);
 
 export default router;

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "../../config/axois";
-import { FaEye, FaEdit, FaTrash, FaVoteYea, FaSearch } from "react-icons/fa";
+import { FaEye, FaEdit, FaTrash, FaVoteYea, FaSearch, FaClipboard, FaUserPlus } from "react-icons/fa";
 import AddElectionForm from "../modals/Organization/AddElectionForm";
 import ViewElectionModal from "../modals/Organization/ViewElectionModal";
 import EditElectionModal from "../modals/Organization/EditElectionModal";
+import { Link } from "react-router-dom";
 
 const statusClasses = {
   "Not Started": "bg-yellow-100 text-yellow-700",
@@ -82,6 +83,44 @@ const ElectionsTab = () => {
         alert(err.response?.data?.message || "Failed to delete election");
       }
     }
+  };
+
+  const handleCopyPublicLink = (election) => {
+    const publicLink = `${window.location.origin}/election/${election._id}`;
+    navigator.clipboard.writeText(publicLink);
+    alert("Public election link copied!");
+  };
+
+  const handleCopyCandidateLinkWithTemplate = (election) => {
+    const candidateLink = `${window.location.origin}/apply/${election._id}`;
+    const template = `
+Election Name: ${election.electionName}
+Date: ${new Date(election.electionDate).toLocaleDateString()}
+Time: ${election.electionStartTime} – ${election.electionEndTime}
+Status: ${election.electionStatus}
+Positions: ${election.electionPosition.map(pos => pos.positionName).join(", ")}
+
+Apply as a candidate using the link below:
+${candidateLink}
+    `.trim();
+    navigator.clipboard.writeText(template);
+    alert("Candidate link with details copied!");
+  };
+
+  const handleCopyVoterLinkWithTemplate = (election) => {
+    const voterLink = `${window.location.origin}/voter/register?election=${election._id}`;
+    const template = `
+Election Name: ${election.electionName}
+Date: ${new Date(election.electionDate).toLocaleDateString()}
+Time: ${election.electionStartTime} – ${election.electionEndTime}
+Status: ${election.electionStatus}
+Positions: ${election.electionPosition.map(pos => pos.positionName).join(", ")}
+
+Register as a voter using the link below:
+${voterLink}
+    `.trim();
+    navigator.clipboard.writeText(template);
+    alert("Voter registration link with details copied!");
   };
 
   if (loading) {
@@ -196,12 +235,26 @@ const ElectionsTab = () => {
                     </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 px-5 py-3 border-t border-gray-100">
+                <div className="bg-gray-50 px-5 py-3 border-t border-gray-100 flex gap-4 items-center">
                   <button
                     onClick={() => handleView(election)}
                     className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
                   >
                     <FaEye className="text-sm" /> View Details
+                  </button>
+                  <button
+                    onClick={() => handleCopyPublicLink(election)}
+                    className="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1"
+                    title="Copy Public Election Link"
+                  >
+                    <FaClipboard className="text-sm" /> Candidate Apply Link
+                  </button>
+                  <button
+                    onClick={() => handleCopyVoterLinkWithTemplate(election)}
+                    className="text-green-600 hover:text-green-800 text-sm font-medium flex items-center gap-1"
+                    title="Copy Voter Registration Link"
+                  >
+                    <FaUserPlus className="text-sm" /> Voter Register Link
                   </button>
                 </div>
               </div>

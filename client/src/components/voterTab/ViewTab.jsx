@@ -13,6 +13,7 @@ const ViewTab = () => {
     const fetchCandidates = async () => {
       try {
         const token = localStorage.getItem("token"); // Get token from localStorage
+        console.log("Token:", token);
         const res = await axios.get("/voter/candidates", {
           headers: {
             Authorization: `Bearer ${token}`,
